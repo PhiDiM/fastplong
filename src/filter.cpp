@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "seprocessor.h"
+#include <cmath>
 
 Filter::Filter(Options* opt){
     mOptions = opt;
@@ -17,7 +18,7 @@ int Filter::passFilter(Read* r) {
     int rlen = r->length();
     int lowQualNum = 0;
     int nBaseNum = 0;
-    int totalQual = 0;
+    float totalQual = 0;
 
     // need to recalculate lowQualNum and nBaseNum if the corresponding filters are enabled
     if(mOptions->qualfilter.enabled || mOptions->lengthFilter.enabled) {
@@ -28,7 +29,7 @@ int Filter::passFilter(Read* r) {
             char base = seqstr[i];
             char qual = qualstr[i];
 
-            totalQual += qual - 33;
+            totalQual += pow(10, ((qual - 33)/(-10.0)));
 
             if(qual < mOptions->qualfilter.qualifiedQual)
                 lowQualNum ++;
@@ -41,7 +42,7 @@ int Filter::passFilter(Read* r) {
     if(mOptions->qualfilter.enabled) {
         if(lowQualNum > (mOptions->qualfilter.unqualifiedPercentLimit * rlen / 100.0) )
             return FAIL_QUALITY;
-        else if(mOptions->qualfilter.avgQualReq > 0 && (totalQual / rlen)<mOptions->qualfilter.avgQualReq)
+        else if(mOptions->qualfilter.avgQualReq > 0 && ((-10)*(log10(totalQual / rlen)))<mOptions->qualfilter.avgQualReq)
             return FAIL_QUALITY;
         else if(nBaseNum * 100 > rlen * mOptions->qualfilter.nBasePercentLimit )
             return FAIL_N_BASE;
@@ -90,21 +91,21 @@ vector<pair<int, int>> Filter::detectLowQualityRegions(Read* r, int windowSize, 
 
     int start = 0;
     while(start + windowSize <= l) {
-        int totalQual = 0;
+        float totalQual = 0;
         // preparing rolling
         for(int i=start; i<windowSize-1 && i<l; i++)
-            totalQual += qualstr[i];
+            totalQual += pow(10, ((qualstr[i] - 33)/(-10.0)));
 
         int windowStart = -1;
         // find the first window with mean quality < quality
         for(int s=start; s+windowSize<l; s++) {
-            if(totalQual < (33 + quality) * windowSize) {
+            if(((-10)*(log10(totalQual / windowSize))) < quality) {
                 windowStart = s;
                 break;
             }
             // roll to the new base
-            totalQual += qualstr[s+windowSize];
-            totalQual -= qualstr[s];
+            totalQual += pow(10, ((qualstr[s+windowSize] - 33)/(-10.0)));
+            totalQual -= pow(10, ((qualstr[s] - 33)/(-10.0)));
         }
 
         if(windowStart == -1)
@@ -114,9 +115,9 @@ vector<pair<int, int>> Filter::detectLowQualityRegions(Read* r, int windowSize, 
         int e;
         for(e=windowStart; e+windowSize<l; e++) {
             // roll to the new base
-            totalQual += qualstr[e+windowSize];
-            totalQual -= qualstr[e];
-            if(totalQual >= (33 + quality) * windowSize) {
+            totalQual += pow(10, ((qualstr[e+windowSize] - 33)/(-10.0)));
+            totalQual -= pow(10, ((qualstr[e] - 33)/(-10.0)));
+            if(((-10)*(log10(totalQual / windowSize))) < quality) {
                 break;
             }
         }
@@ -162,20 +163,20 @@ Read* Filter::trimAndCut(Read* r, int front, int tail, int& frontTrimmed) {
         if(l - front - tail - w <= 0)
             return NULL;
 
-        int totalQual = 0;
+        float totalQual = 0;
 
         // preparing rolling
         for(int i=0; i<w-1; i++)
-            totalQual += qualstr[s+i];
+            totalQual += pow(10, ((qualstr[s+i] - 33)/(-10.0)));
 
         for(s=front; s+w<l-tail; s++) {
-            totalQual += qualstr[s+w-1];
+            totalQual += pow(10, ((qualstr[s+w-1] - 33)/(-10.0)));
             // rolling
             if(s > front) {
-                totalQual -= qualstr[s-1];
+                totalQual -= pow(10, ((qualstr[s-1] - 33)/(-10.0)));
             }
             // add 33 for phred33 transforming
-            if((double)totalQual / (double)w >= 33 + mOptions->qualityCut.qualityFront)
+            if((double)((-10)*(log10(totalQual / w))) >= mOptions->qualityCut.qualityFront)
                 break;
         }
 
@@ -193,21 +194,21 @@ Read* Filter::trimAndCut(Read* r, int front, int tail, int& frontTrimmed) {
         if(l - front - tail - w <= 0)
             return NULL;
 
-        int totalQual = 0;
+        float totalQual = 0;
         int t = l - tail - 1;
 
         // preparing rolling
         for(int i=0; i<w-1; i++)
-            totalQual += qualstr[t-i];
+            totalQual += pow(10, ((qualstr[t-i] - 33)/(-10.0)));
 
         for(t=l-tail-1; t-w>=front; t--) {
-            totalQual += qualstr[t-w+1];
+            totalQual += pow(10, ((qualstr[t-w+1] - 33)/(-10.0)));
             // rolling
             if(t < l-tail-1) {
-                totalQual -= qualstr[t+1];
+                totalQual -= pow(10, ((qualstr[t+1] - 33)/(-10.0)));
             }
             // add 33 for phred33 transforming
-            if((double)totalQual / (double)w >= 33 + mOptions->qualityCut.qualityTail)
+            if((double)((-10)*(log10(totalQual / w))) >= mOptions->qualityCut.qualityTail)
                 break;
         }
 
