@@ -98,11 +98,11 @@ void Stats::extendBuffer(int newBufLen){
         delete mCycleBaseContents[i];
         mCycleBaseContents[i] = newBuf;
 
-        newBuf = new long[newBufLen];
-        memset(newBuf, 0, sizeof(long)*newBufLen);
-        memcpy(newBuf, mCycleBaseQual[i], sizeof(float) * mBufLen);
+        newBuf_float = new float[newBufLen];
+        memset(newBuf_float, 0, sizeof(float)*newBufLen);
+        memcpy(newBuf_float, mCycleBaseQual[i], sizeof(float) * mBufLen);
         delete mCycleBaseQual[i];
-        mCycleBaseQual[i] = newBuf;
+        mCycleBaseQual[i] = newBuf_float;
     }
     newBuf = new long[newBufLen];
     memset(newBuf, 0, sizeof(long)*newBufLen);
@@ -110,11 +110,11 @@ void Stats::extendBuffer(int newBufLen){
     delete mCycleTotalBase;
     mCycleTotalBase = newBuf;
 
-    newBuf = new long[newBufLen];
-    memset(newBuf, 0, sizeof(long)*newBufLen);
-    memcpy(newBuf, mCycleTotalQual, sizeof(float)*mBufLen);
+    newBuf_float = new float[newBufLen];
+    memset(newBuf_float, 0, sizeof(float)*newBufLen);
+    memcpy(newBuf_float, mCycleTotalQual, sizeof(float)*mBufLen);
     delete mCycleTotalQual;
-    mCycleTotalQual = newBuf;
+    mCycleTotalQual = newBuf_float;
 
     mBufLen = newBufLen;
 }
