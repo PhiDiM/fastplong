@@ -3,6 +3,7 @@
 #include <sstream>
 #include "util.h"
 #include "htmlreporter.h"
+#include <cmath>
 
 #define KMER_LEN 5
 
@@ -54,14 +55,14 @@ Stats::Stats(Options* opt, int guessedCycles, int bufferMargin){
         mCycleBaseContents[i] = new long[mBufLen];
         memset(mCycleBaseContents[i], 0, sizeof(long) * mBufLen);
 
-        mCycleBaseQual[i] = new long[mBufLen];
-        memset(mCycleBaseQual[i], 0, sizeof(long) * mBufLen);
+        mCycleBaseQual[i] = new float[mBufLen];
+        memset(mCycleBaseQual[i], 0, sizeof(float) * mBufLen);
     }
     mCycleTotalBase = new long[mBufLen];
     memset(mCycleTotalBase, 0, sizeof(long)*mBufLen);
 
-    mCycleTotalQual = new long[mBufLen];
-    memset(mCycleTotalQual, 0, sizeof(long)*mBufLen);
+    mCycleTotalQual = new float[mBufLen];
+    memset(mCycleTotalQual, 0, sizeof(float)*mBufLen);
 
     mKmerBufLen = 2<<(KMER_LEN * 2);
     mKmer = new long[mKmerBufLen];
@@ -99,7 +100,7 @@ void Stats::extendBuffer(int newBufLen){
 
         newBuf = new long[newBufLen];
         memset(newBuf, 0, sizeof(long)*newBufLen);
-        memcpy(newBuf, mCycleBaseQual[i], sizeof(long) * mBufLen);
+        memcpy(newBuf, mCycleBaseQual[i], sizeof(float) * mBufLen);
         delete mCycleBaseQual[i];
         mCycleBaseQual[i] = newBuf;
     }
@@ -111,7 +112,7 @@ void Stats::extendBuffer(int newBufLen){
 
     newBuf = new long[newBufLen];
     memset(newBuf, 0, sizeof(long)*newBufLen);
-    memcpy(newBuf, mCycleTotalQual, sizeof(long)*mBufLen);
+    memcpy(newBuf, mCycleTotalQual, sizeof(float)*mBufLen);
     delete mCycleTotalQual;
     mCycleTotalQual = newBuf;
 
@@ -206,7 +207,7 @@ void Stats::summarize(bool forced) {
     double* meanQualCurve = new double[mCycles];
     memset(meanQualCurve, 0, sizeof(double)*mCycles);
     for(int c=0; c<mCycles; c++) {
-        meanQualCurve[c] = (double)mCycleTotalQual[c] / (double)mCycleTotalBase[c];
+        meanQualCurve[c] = (double)((-10)*(log10(mCycleTotalQual[c] / mCycleTotalBase[c])));
     }
     mQualityCurves["mean"] = meanQualCurve;
 
@@ -226,7 +227,7 @@ void Stats::summarize(bool forced) {
             if(mCycleBaseContents[b][c] == 0)
                 qualCurve[c] = meanQualCurve[c];
             else
-                qualCurve[c] = (double)mCycleBaseQual[b][c] / (double)mCycleBaseContents[b][c];
+                qualCurve[c] = (double)((-10)*(log10(mCycleBaseQual[b][c] / mCycleBaseContents[b][c])));
             contentCurve[c] = (double)mCycleBaseContents[b][c] / (double)mCycleTotalBase[c];
         }
         mQualityCurves[string(1, base)] = qualCurve;
@@ -301,10 +302,10 @@ void Stats::statRead(Read* r) {
         }
 
         mCycleBaseContents[b][i]++;
-        mCycleBaseQual[b][i] += (qual-33);
+        mCycleBaseQual[b][i] += pow(10, ((qual-33)/(-10.0)));
 
         mCycleTotalBase[i]++;
-        mCycleTotalQual[i] += (qual-33);
+        mCycleTotalQual[i] += pow(10, ((qual-33)/(-10.0)));
 
         if(base == 'N'){
             needFullCompute = true;
