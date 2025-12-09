@@ -78,6 +78,7 @@ void Stats::extendBuffer(int newBufLen){
         return ;
 
     long* newBuf = NULL;
+    float* newBuf_float = NULL;
 
     for(int i=0; i<8; i++){
         newBuf = new long[newBufLen];
