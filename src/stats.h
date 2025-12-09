@@ -70,9 +70,9 @@ private:
     long *mCycleQ30Bases[8];
     long *mCycleQ20Bases[8];
     long *mCycleBaseContents[8];
-    long *mCycleBaseQual[8];
+    float *mCycleBaseQual[8];
     long *mCycleTotalBase;
-    long *mCycleTotalQual;
+    float *mCycleTotalQual;
     long *mKmer;
     long mBaseQualHistogram[128];
     long mMedianReadQualHistogram[128];
