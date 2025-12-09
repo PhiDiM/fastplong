@@ -17,6 +17,6 @@ TEST(FilerTest, trimAndCut) {
     int frontTrimmed = 0;
     Read* ret = filter.trimAndCut(&r, 0, 1, frontTrimmed);
 
-    EXPECT_EQ(*ret->mSeq, "CCCCCCCCCCCCCCCCCCCCCCCCCCCC");
-    EXPECT_EQ(*ret->mQuality, "CCCCCCCCCCC////CCCCCCCCCCCCC");
+    EXPECT_EQ(*ret->mSeq, "CCCCCCCCCCCCCCCCCCCCCCCC");
+    EXPECT_EQ(*ret->mQuality, "CCCCCCCCC////CCCCCCCCCCC");
 }
