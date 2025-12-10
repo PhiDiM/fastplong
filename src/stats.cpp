@@ -55,14 +55,14 @@ Stats::Stats(Options* opt, int guessedCycles, int bufferMargin){
         mCycleBaseContents[i] = new long[mBufLen];
         memset(mCycleBaseContents[i], 0, sizeof(long) * mBufLen);
 
-        mCycleBaseQual[i] = new float[mBufLen];
-        memset(mCycleBaseQual[i], 0, sizeof(float) * mBufLen);
+        mCycleBaseQual[i] = new double[mBufLen];
+        memset(mCycleBaseQual[i], 0, sizeof(double) * mBufLen);
     }
     mCycleTotalBase = new long[mBufLen];
     memset(mCycleTotalBase, 0, sizeof(long)*mBufLen);
 
-    mCycleTotalQual = new float[mBufLen];
-    memset(mCycleTotalQual, 0, sizeof(float)*mBufLen);
+    mCycleTotalQual = new double[mBufLen];
+    memset(mCycleTotalQual, 0, sizeof(double)*mBufLen);
 
     mKmerBufLen = 2<<(KMER_LEN * 2);
     mKmer = new long[mKmerBufLen];
@@ -78,7 +78,7 @@ void Stats::extendBuffer(int newBufLen){
         return ;
 
     long* newBuf = NULL;
-    float* newBuf_float = NULL;
+    double* newBuf_double = NULL;
 
     for(int i=0; i<8; i++){
         newBuf = new long[newBufLen];
@@ -99,11 +99,11 @@ void Stats::extendBuffer(int newBufLen){
         delete mCycleBaseContents[i];
         mCycleBaseContents[i] = newBuf;
 
-        newBuf_float = new float[newBufLen];
-        memset(newBuf_float, 0, sizeof(float)*newBufLen);
-        memcpy(newBuf_float, mCycleBaseQual[i], sizeof(float) * mBufLen);
+        newBuf_double = new double[newBufLen];
+        memset(newBuf_double, 0, sizeof(double)*newBufLen);
+        memcpy(newBuf_double, mCycleBaseQual[i], sizeof(double) * mBufLen);
         delete mCycleBaseQual[i];
-        mCycleBaseQual[i] = newBuf_float;
+        mCycleBaseQual[i] = newBuf_double;
     }
     newBuf = new long[newBufLen];
     memset(newBuf, 0, sizeof(long)*newBufLen);
@@ -111,11 +111,11 @@ void Stats::extendBuffer(int newBufLen){
     delete mCycleTotalBase;
     mCycleTotalBase = newBuf;
 
-    newBuf_float = new float[newBufLen];
-    memset(newBuf_float, 0, sizeof(float)*newBufLen);
-    memcpy(newBuf_float, mCycleTotalQual, sizeof(float)*mBufLen);
+    newBuf_double = new double[newBufLen];
+    memset(newBuf_double, 0, sizeof(double)*newBufLen);
+    memcpy(newBuf_double, mCycleTotalQual, sizeof(double)*mBufLen);
     delete mCycleTotalQual;
-    mCycleTotalQual = newBuf_float;
+    mCycleTotalQual = newBuf_double;
 
     mBufLen = newBufLen;
 }

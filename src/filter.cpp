@@ -18,7 +18,7 @@ int Filter::passFilter(Read* r) {
     int rlen = r->length();
     int lowQualNum = 0;
     int nBaseNum = 0;
-    float totalQual = 0;
+    double totalQual = 0;
 
     // need to recalculate lowQualNum and nBaseNum if the corresponding filters are enabled
     if(mOptions->qualfilter.enabled || mOptions->lengthFilter.enabled) {
@@ -91,7 +91,7 @@ vector<pair<int, int>> Filter::detectLowQualityRegions(Read* r, int windowSize, 
 
     int start = 0;
     while(start + windowSize <= l) {
-        float totalQual = 0;
+        double totalQual = 0;
         // preparing rolling
         for(int i=start; i<windowSize-1 && i<l; i++)
             totalQual += pow(10, ((qualstr[i] - 33)/(-10.0)));
@@ -163,7 +163,7 @@ Read* Filter::trimAndCut(Read* r, int front, int tail, int& frontTrimmed) {
         if(l - front - tail - w <= 0)
             return NULL;
 
-        float totalQual = 0;
+        double totalQual = 0;
 
         // preparing rolling
         for(int i=0; i<w-1; i++)
@@ -194,7 +194,7 @@ Read* Filter::trimAndCut(Read* r, int front, int tail, int& frontTrimmed) {
         if(l - front - tail - w <= 0)
             return NULL;
 
-        float totalQual = 0;
+        double totalQual = 0;
         int t = l - tail - 1;
 
         // preparing rolling
