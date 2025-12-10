@@ -117,7 +117,7 @@ vector<pair<int, int>> Filter::detectLowQualityRegions(Read* r, int windowSize, 
             // roll to the new base
             totalQual += pow(10, ((qualstr[e+windowSize] - 33)/(-10.0)));
             totalQual -= pow(10, ((qualstr[e] - 33)/(-10.0)));
-            if(((-10)*(log10(totalQual / windowSize))) < quality) {
+            if(((-10)*(log10(totalQual / windowSize))) >= quality) {
                 break;
             }
         }
